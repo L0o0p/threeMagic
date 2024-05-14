@@ -1,0 +1,29 @@
+.container {
+    width: 400px;
+    height: 500px;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: #f1f1f1;
+    border-radius: 20px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+    gap: 20px;
+}
+
+.in {
+    // background-color: red;
+    justify-content: end;
+    display: flex;
+    width: 100%;
+}
+
+// button {
+//     z-index: 10;
+//     position: absolute;
+//     top: 50px;
+//     left: 50px
+// }
