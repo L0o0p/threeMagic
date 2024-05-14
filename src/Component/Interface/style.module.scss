@@ -1,6 +1,6 @@
 .container {
-    width: 400px;
-    height: 500px;
+    width: 240px;
+    height: 300px;
     position: absolute;
     top: 10px;
     left: 10px;
@@ -14,11 +14,27 @@
     gap: 20px;
 }
 
-.in {
+.closeLine {
     // background-color: red;
     justify-content: end;
     display: flex;
     width: 100%;
+
+    .closeBox {
+        width: 24px;
+        height: 24px;
+        cursor: pointer
+    }
+}
+
+.title {
+    font-size: 20px;
+    font-weight: bold
+}
+
+.inputBlock {
+    display: flex;
+    gap: 10px;
 }
 
 // button {

@@ -1,9 +1,12 @@
 import { OrbitControls, PerspectiveCamera, Text } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { selectedComponentAtom } from "../../store";
+import { positionAtom, selectedComponentAtom } from "../../store";
 import { useAtom } from "jotai";
+import { useEffect, useState } from "react";
 
 export const ThreeD = () => {
+    const [components, setComponents] = useAtom(selectedComponentAtom);
+
     return (
         <Canvas>
             <ambientLight intensity={10} />
@@ -17,7 +20,8 @@ export const ThreeD = () => {
                 near={0.1}
                 far={100000}
             />
-            <Exist />
+            {/* <Instance info={components} /> */}
+            <Scene />
             <gridHelper
                 args={[20, 20, 0xff0000]}
             />
@@ -25,35 +29,47 @@ export const ThreeD = () => {
     )
 }
 
-const Exist = () => {
-    const [existObj] = useAtom(selectedComponentAtom)
+
+const Scene = () => {
+    // 初始渲染列表，带有位置数据
+    const renderList = [
+        { a: { id: 'a', position: { x: 0, y: 0, z: 0 } } },
+        { b: { id: 'b', position: { x: 1.5, y: 0, z: 0 } } }
+    ];
+    const [render, setRender] = useState(renderList);
+    const [components] = useAtom(selectedComponentAtom);
+
+    useEffect(() => {
+        if (components && components.position) {
+            const updateRender = [...render];
+            updateRender.push({ [components.id]: components });
+            setRender(updateRender);
+        } else {
+            console.error("Component missing or invalid position data");
+        }
+    }, [components]);
+
     return (
         <group>
-            {existObj.map((item) =>
-                Array.from({ length: item.num }, (_, index) => {
-                    // 为每个 Text 计算独特的位置和旋转
-                    const positionOffset = 0.05; // 每个 Text 的位置偏移量
-                    const rotationOffset = Math.PI / 6; // 每个 Text 的旋转偏移量（5度）
+            {
+                render.map((obj, index) => {
+                    const key = Object.keys(obj)[0];
+                    const component = obj[key];
+                    // 安全地访问 position，如果不存在则使用默认值
+                    const { x = 0, y = 0, z = 0 } = component.position || {};
 
                     return (
                         <Text
-                            key={`${item.name}-${index}`}  // 使用 index 来确保 key 的唯一性
-                            scale={0.5}
-                            position={[
-                                item.position.x + index * positionOffset,  // 添加基于 index 的偏移
-                                item.position.y,
-                                item.position.z
-                            ]}
-                            rotation={[
-                                item.rotation.x,
-                                item.rotation.y + index * rotationOffset,  // 添加基于 index 的旋转偏移
-                                item.rotation.z
-                            ]}
-                            children={item.name}
+                            key={key + [x, y, z]}
+                            children={component.id}
+                            onClick={() => console.log('obj:', obj)}
+                            position={[x, y, z]} // 使用组件的位置数据
                         />
-                    );
+                    )
                 })
-            )}
+            }
         </group>
-    )
+    );
 }
+
+export default Scene;
