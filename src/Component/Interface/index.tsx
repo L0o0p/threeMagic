@@ -6,7 +6,7 @@ import styles from './style.module.scss'
 export const Interface = () => {
     const [position, setPosition] = useAtom(positionAtom)
     const buttonList: StoreKey[] = ['table', 'chair', 'door'];
-    const [components, setComponents] = useAtom(selectedComponentAtom);
+    const [, setComponents] = useAtom(selectedComponentAtom);
     const checkList: Store = store; // 使用 Store 类型
     const handleClick = (item: string) => {
         console.log('点击了按钮:', item);

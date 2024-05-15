@@ -1,11 +1,11 @@
 import { OrbitControls, PerspectiveCamera, Text } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { positionAtom, selectedComponentAtom } from "../../store";
+import { selectedComponentAtom } from "../../store";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
+import { RenderItem } from "../../types";
 
 export const ThreeD = () => {
-    const [components, setComponents] = useAtom(selectedComponentAtom);
 
     return (
         <Canvas>
@@ -36,32 +36,32 @@ const Scene = () => {
         { a: { id: 'a', position: { x: 0, y: 0, z: 0 } } },
         { b: { id: 'b', position: { x: 1.5, y: 0, z: 0 } } }
     ];
-    const [render, setRender] = useState(renderList);
+    const [render, setRender] = useState<RenderItem[]>(renderList);
     const [components] = useAtom(selectedComponentAtom);
 
     useEffect(() => {
         if (components && components.position) {
             const updateRender = [...render];
-            updateRender.push({ [components.id]: components });
+            updateRender.push({ [components.id]: { id: components.id, position: components.position } });
             setRender(updateRender);
         } else {
             console.error("Component missing or invalid position data");
         }
-    }, [components]);
+    }, [components, render]);
 
     return (
         <group>
             {
-                render.map((obj, index) => {
+                render.map((obj) => {
                     const key = Object.keys(obj)[0];
-                    const component = obj[key];
+                    const component = obj[key as keyof RenderItem];
                     // 安全地访问 position，如果不存在则使用默认值
-                    const { x = 0, y = 0, z = 0 } = component.position || {};
+                    const { x = 0, y = 0, z = 0 } = component?.position || {};
 
                     return (
                         <Text
-                            key={key + [x, y, z]}
-                            children={component.id}
+                            key={key + `${x},${y},${z}`}
+                            children={component?.id}
                             onClick={() => console.log('obj:', obj)}
                             position={[x, y, z]} // 使用组件的位置数据
                         />
