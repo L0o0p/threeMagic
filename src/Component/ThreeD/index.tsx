@@ -30,20 +30,19 @@ export const ThreeD = () => {
 }
 
 export type RenderItem = {
-    [key: string]: {
-        uniqueId: number;
-        id: string;
-        position: {
-            x: number;
-            y: number;
-            z: number;
-        };
-        url: string;
-    } | undefined;
-};
+
+    uniqueId: number;
+    id: string;
+    position: {
+        x: number;
+        y: number;
+        z: number;
+    };
+    url: string;
+} | undefined;
 const Scene = () => {
-    const [render, setRender] = useState([]);
-    const [components, setComponents] = useAtom(selectedComponentAtom);
+    const [render, setRender] = useState<RenderItem[]>([]);
+    const [components] = useAtom(selectedComponentAtom);
     const [uniqueId, setUniqueId] = useState(0);
 
     useEffect(() => {
@@ -56,7 +55,7 @@ const Scene = () => {
             };
             setRender([...render, newItem]);
             setUniqueId(uniqueId + 1); // 更新 uniqueId
-            console.log('渲染列表',render)
+            console.log('渲染列表', render)
         } else {
             console.error("Component missing or invalid position data");
         }
@@ -64,18 +63,26 @@ const Scene = () => {
 
     return (
         <group>
-            {render.map((item) => (
+            {render.map((item) => ((item) && (
                 <Model
                     key={`${item.id}-${item.uniqueId}`}
                     url={item.url}
-                    position={{ x: item.position.x, y: item.position.y, z: item.position.z }}
+                    position={{ x: item.position?.x, y: item.position?.y, z: item.position?.z }}
                 />
-            ))}
+            )))}
         </group>
     );
 }
 
-function Model({ url, position }) {
+interface ModelProps {
+    url: string;
+    position: {
+        x: number;
+        y: number;
+        z: number;
+    };
+}
+function Model({ url, position }: ModelProps) {
     const gltf = useLoader(GLTFLoader, url);
     // 克隆 gltf.scene 以确保每个实例都是独立的
     const sceneClone = useMemo(() => gltf.scene.clone(), [gltf.scene]);
