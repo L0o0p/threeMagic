@@ -12,6 +12,7 @@
     align-items: center;
     padding: 24px;
     gap: 20px;
+    overflow: 'hidden'
 }
 
 .closeLine {
@@ -32,14 +33,13 @@
     font-weight: bold
 }
 
-.inputBlock {
+.positionSetting {
     display: flex;
+    flex-direction: column;
     gap: 10px;
-}
 
-// button {
-//     z-index: 10;
-//     position: absolute;
-//     top: 50px;
-//     left: 50px
-// }
+    .inputBlock {
+        display: flex;
+        gap: 10px;
+    }
+}

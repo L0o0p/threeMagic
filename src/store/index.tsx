@@ -10,7 +10,7 @@ export interface StoreProps {
     chair: { id: string; url: string, position?: { x: number; y: number; z: number }; };
     door: { id: string; url: string, position?: { x: number; y: number; z: number }; };
 }
-// 数据表
+// 可用模型数据表
 export const store: StoreProps =
 {
     table: { id: 'table', url: '/models/table.glb', position: { x: 0, y: 0, z: 0 } },
@@ -18,8 +18,9 @@ export const store: StoreProps =
     door: { id: 'door', url: '/models/door.glb', position: { x: 0, y: 0, z: 0 } }
 }
 
-// 创建一个 atom 来存储选中的组件
 // 创建新对象需要携带的信息
 export const selectedComponentAtom = atom<{ id: string; url: string; position?: { x: number; y: number; z: number } } | null>(null);
-
+// 记录用户输入的位置信息
 export const positionAtom = atom({ x: 0, y: 0, z: 0 })
+// 记录选用的材质信息
+export const materialAtom = atom(0)

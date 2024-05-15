@@ -1,9 +1,10 @@
-import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
+import { IsObject, OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Canvas, useLoader } from "@react-three/fiber";
-import { selectedComponentAtom } from "../../store";
+import { materialAtom, selectedComponentAtom } from "../../store";
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { MeshStandardMaterial } from "three";
 
 export const ThreeD = () => {
 
@@ -84,8 +85,28 @@ interface ModelProps {
 }
 function Model({ url, position }: ModelProps) {
     const gltf = useLoader(GLTFLoader, url);
+    const [material] = useAtom(materialAtom);
+
     // 克隆 gltf.scene 以确保每个实例都是独立的
-    const sceneClone = useMemo(() => gltf.scene.clone(), [gltf.scene]);
+    const sceneClone = useMemo(() => {
+        if (!gltf || !gltf.scene) return null; // 确保 gltf 和 gltf.scene 是有效的
+
+        const clone = gltf.scene.clone();
+        if (material != 0) {
+            clone.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = new MeshStandardMaterial({
+                        color: 'royalblue',
+                        metalness: 0.5,
+                        roughness: 0.1
+                    });
+                }
+            });
+        }
+        return clone;
+    }, [gltf.scene]);
+
+    if (!sceneClone) return null; // 如果没有有效的 sceneClone，不渲染组件
 
     return (
         <primitive
