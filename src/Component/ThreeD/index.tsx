@@ -1,9 +1,9 @@
-import { OrbitControls, PerspectiveCamera, Text } from "@react-three/drei";
-import { Canvas } from "@react-three/fiber";
+import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
+import { Canvas, useLoader } from "@react-three/fiber";
 import { selectedComponentAtom } from "../../store";
 import { useAtom } from "jotai";
-import { useEffect, useState } from "react";
-import { RenderItem } from "../../types";
+import { useEffect, useMemo, useState } from "react";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 export const ThreeD = () => {
 
@@ -29,47 +29,61 @@ export const ThreeD = () => {
     )
 }
 
-
+export type RenderItem = {
+    [key: string]: {
+        uniqueId: number;
+        id: string;
+        position: {
+            x: number;
+            y: number;
+            z: number;
+        };
+        url: string;
+    } | undefined;
+};
 const Scene = () => {
-    // 初始渲染列表，带有位置数据
-    const renderList = [
-        { a: { id: 'a', position: { x: 0, y: 0, z: 0 } } },
-        { b: { id: 'b', position: { x: 1.5, y: 0, z: 0 } } }
-    ];
-    const [render, setRender] = useState<RenderItem[]>(renderList);
-    const [components] = useAtom(selectedComponentAtom);
+    const [render, setRender] = useState([]);
+    const [components, setComponents] = useAtom(selectedComponentAtom);
+    const [uniqueId, setUniqueId] = useState(0);
 
     useEffect(() => {
         if (components && components.position) {
-            const updateRender = [...render];
-            updateRender.push({ [components.id]: { id: components.id, position: components.position } });
-            setRender(updateRender);
+            const newItem = {
+                id: components.id,
+                position: components.position,
+                url: components.url,
+                uniqueId: uniqueId
+            };
+            setRender([...render, newItem]);
+            setUniqueId(uniqueId + 1); // 更新 uniqueId
+            console.log('渲染列表',render)
         } else {
             console.error("Component missing or invalid position data");
         }
-    }, [components, render]);
+    }, [components]);
 
     return (
         <group>
-            {
-                render.map((obj) => {
-                    const key = Object.keys(obj)[0];
-                    const component = obj[key as keyof RenderItem];
-                    // 安全地访问 position，如果不存在则使用默认值
-                    const { x = 0, y = 0, z = 0 } = component?.position || {};
-
-                    return (
-                        <Text
-                            key={key + `${x},${y},${z}`}
-                            children={component?.id}
-                            onClick={() => console.log('obj:', obj)}
-                            position={[x, y, z]} // 使用组件的位置数据
-                        />
-                    )
-                })
-            }
+            {render.map((item) => (
+                <Model
+                    key={`${item.id}-${item.uniqueId}`}
+                    url={item.url}
+                    position={{ x: item.position.x, y: item.position.y, z: item.position.z }}
+                />
+            ))}
         </group>
     );
 }
 
-export default Scene;
+function Model({ url, position }) {
+    const gltf = useLoader(GLTFLoader, url);
+    // 克隆 gltf.scene 以确保每个实例都是独立的
+    const sceneClone = useMemo(() => gltf.scene.clone(), [gltf.scene]);
+
+    return (
+        <primitive
+            object={sceneClone}
+            position={[position.x, position.y, position.z]}
+        />
+    );
+}
